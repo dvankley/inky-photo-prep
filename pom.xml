@@ -17,6 +17,8 @@
         <kotlin.code.style>official</kotlin.code.style>
         <java.version>17</java.version>
         <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <kotlin.version>1.7.10</kotlin.version>
         <coroutines.version>1.6.3</coroutines.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>

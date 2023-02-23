@@ -1,5 +1,6 @@
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.exif.ExifIFD0Directory
+import encoding.InkyFramebufferEncoder
 import faces.DnnFaceDetector
 import faces.FaceDetector
 import kotlinx.coroutines.*
@@ -15,6 +16,7 @@ import java.io.FilenameFilter
 import java.nio.file.Path
 import javax.imageio.ImageIO
 import kotlin.io.path.Path
+import kotlin.io.path.writeBytes
 import kotlin.math.roundToInt
 
 
@@ -25,11 +27,29 @@ val PhotoFilenameFilter = FilenameFilter { _, name ->
             !lower.endsWith("mp4")
 }
 
+enum class OutputType {
+    RpiJpeg,
+    InkyPicoBinary,
+}
+
 /**
  * Set to true to write to output a copy of each input image with boxes drawn around each recognized face,
  *  with brightness proportional to confidence.
  */
-const val DEBUG = false
+const val FACE_DETECTION_DEBUG = false
+
+/**
+ * Set to desired dithering class
+ */
+val ditherer = PatternDitherer()
+
+/**
+ * Choose your preferred face detector here.
+ * There honestly isn't much point in using the haar detector.
+ */
+val detector = DnnFaceDetector()
+
+val outputType = OutputType.InkyPicoBinary
 
 /**
  * Width dimension of target display
@@ -67,11 +87,6 @@ fun main(args: Array<String>) {
     )
     val outputPath = Path(args[1])
 
-    // Choose your preferred face detector here.
-    // There honestly isn't much point in using the haar detector.
-//    val detector = HaarFaceDetector()
-    val detector = DnnFaceDetector()
-
     runBlocking {
         val heic = HeicTranscoder(inputPath)
         heic.convertAllHeicFiles()
@@ -89,14 +104,15 @@ fun main(args: Array<String>) {
         inputFileChannel.close()
 
         // Process in parallel
-        val processingWorkers = (1..workerCount).map {
-            imageProcessingWorker(inputFileChannel, detector, outputPath)
+        val processingWorkers = (1..workerCount).map { index ->
+            imageProcessingWorker(index, inputFileChannel, detector, outputPath)
         }
         processingWorkers.joinAll()
     }
 }
 
 private fun CoroutineScope.imageProcessingWorker(
+    index: Int,
     fileChannel: ReceiveChannel<File>,
     detector: FaceDetector,
     outputPath: Path,
@@ -133,16 +149,24 @@ private fun CoroutineScope.imageProcessingWorker(
         scaled.graphics.drawImage(tmpScaled, 0, 0, null)
 
         println("$logPrefix Dithering image")
-        val ditherer = PatternDitherer()
         val dithered = ditherer.dither(scaled)
 
-        val outFullPath = outputPath
-            .resolve(file.name)
-
         println("$logPrefix Writing output file")
-        // Write to output directory
-        withContext(Dispatchers.IO) {
-            ImageIO.write(dithered, "jpg", outFullPath.toFile())
+
+        when (outputType) {
+            OutputType.RpiJpeg -> {
+                // Write to output directory
+                withContext(Dispatchers.IO) {
+                    ImageIO.write(dithered, "jpg", outputPath.resolve(file.name).toFile())
+                }
+            }
+            OutputType.InkyPicoBinary -> {
+                val encoder = InkyFramebufferEncoder()
+                // Write to output directory
+                withContext(Dispatchers.IO) {
+                    outputPath.resolve("${index}.bin").writeBytes(encoder.encode(dithered))
+                }
+            }
         }
     }
 }
@@ -216,7 +240,7 @@ suspend fun readAndRotateImage(file: File): BufferedImage {
 }
 
 suspend fun getCropCenterTarget(faces: List<DnnFaceDetector.Face>, file: File, img: BufferedImage): Point {
-    if (DEBUG) {
+    if (FACE_DETECTION_DEBUG) {
         val debugImg = Java2DFrameConverter.cloneBufferedImage(img)
         val graph: Graphics2D = debugImg.createGraphics()
         graph.stroke = BasicStroke(20.0f)

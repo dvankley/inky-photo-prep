@@ -1,3 +1,5 @@
+import dithering.Ditherer
+import dithering.inkyPalette
 import java.awt.Color
 import java.awt.image.BufferedImage
 
@@ -13,27 +15,8 @@ import java.awt.image.BufferedImage
  * One side effect of this is there's a bunch of unsigned types in here that probably don't need to be
  *  here, I just left them in to minimize the chance of bugs in the conversion.
  */
-class PatternDitherer {
+class PatternDitherer : Ditherer {
     private val errorMultiplier = .09
-
-    // Inline comments are output from inky/examples/7color/colour_palette.py
-    // python3 colour-palette.py -f ~/palette -t gpl
-    private val pal: Array<UInt> = arrayOf(
-//    28 24 28 Index 0 # black
-        Color(28, 24, 28).rgb.toUInt(),
-//    255 255 255 Index 1 # white
-        Color(255, 255, 255).rgb.toUInt(),
-//    29 173 35 Index 2 # green
-        Color(29, 173, 35).rgb.toUInt(),
-//    30 29 174 Index 3 # blue
-        Color(30, 29, 174).rgb.toUInt(),
-//    205 36 37 Index 4 # red
-        Color(205, 36, 37).rgb.toUInt(),
-//    231 222 35 Index 5 # yellow
-        Color(231, 222, 35).rgb.toUInt(),
-//    216 123 36 Index 6 # orange
-        Color(216, 123, 36).rgb.toUInt(),
-    )
 
     /* 8x8 threshold map (note: the patented pattern dithering algorithm uses 4x4) */
     private val map: Array<UByte> = arrayOf(
@@ -49,7 +32,7 @@ class PatternDitherer {
 
 
     /* Luminance for each palette entry, to be initialized as soon as the program begins */
-    var luma = Array<UInt>(pal.size) { 0.toUInt() }
+    var luma = Array<UInt>(inkyPalette.size) { 0.toUInt() }
 
     private fun PaletteCompareLuma(index1: UInt, index2: UInt): Int
     {
@@ -92,10 +75,10 @@ class PatternDitherer {
             if(t[2]<0) t[2]=0; else if(t[2]>255) t[2]=255
             // Find the closest color from the palette
             var leastPenalty: Double = 1e99
-            var chosen: UInt = c % pal.size.toUInt()
-            for(index in pal.indices)
+            var chosen: UInt = c % inkyPalette.size.toUInt()
+            for(index in inkyPalette.indices)
             {
-                val pc = Color(pal[index].toInt())
+                val pc = Color(inkyPalette[index].toInt())
                 val penalty: Double = ColorCompare(pc, Color(t[0],t[1],t[2]))
                 if(penalty < leastPenalty)
                 {
@@ -105,7 +88,7 @@ class PatternDitherer {
             }
             // Add it to candidates and update the error
             result.colors[c.toInt()] = chosen
-            val pc = Color(pal[chosen.toInt()].toInt())
+            val pc = Color(inkyPalette[chosen.toInt()].toInt())
             e[0] += src.red-pc.red
             e[1] += src.green-pc.green
             e[2] += src.blue-pc.blue
@@ -115,25 +98,25 @@ class PatternDitherer {
         return result
     }
 
-    fun dither(srcim: BufferedImage): BufferedImage {
-        val w = srcim.width
-        val h = srcim.height
-        val im = BufferedImage(srcim.width, srcim.height, BufferedImage.TYPE_INT_RGB)
-        for (c in 0u until pal.size.toUInt())
+    override fun dither(srcImage: BufferedImage): BufferedImage {
+        val w = srcImage.width
+        val h = srcImage.height
+        val im = BufferedImage(srcImage.width, srcImage.height, BufferedImage.TYPE_INT_RGB)
+        for (c in 0u until inkyPalette.size.toUInt())
         {
-            val r: UInt = pal[c.toInt()] shr 16
-            val g: UInt = (pal[c.toInt()] shr 8) and 0xFFu
-            val b: UInt = pal[c.toInt()] and 0xFFu
+            val r: UInt = inkyPalette[c.toInt()] shr 16
+            val g: UInt = (inkyPalette[c.toInt()] shr 8) and 0xFFu
+            val b: UInt = inkyPalette[c.toInt()] and 0xFFu
             luma[c.toInt()] = r*299u + g*587u + b*114u
         }
         for (y in 0 until h) {
             for (x in 0 until w)
             {
-                val color = srcim.getRGB(x, y)
+                val color = srcImage.getRGB(x, y)
                 val map_value: UInt = map [(x and 7)+((y and 7) shl 3)].toUInt()
                 val plan = DeviseBestMixingPlan (color)
-                // The code online was conspicuously missing the pal[] reference here, which breaks the whole thing
-                im.setRGB(x, y, pal[plan.colors[map_value.toInt()].toInt()].toInt())
+                // The code online was conspicuously missing the inkyPalette[] reference here, which breaks the whole thing
+                im.setRGB(x, y, inkyPalette[plan.colors[map_value.toInt()].toInt()].toInt())
             }
         }
         return im
