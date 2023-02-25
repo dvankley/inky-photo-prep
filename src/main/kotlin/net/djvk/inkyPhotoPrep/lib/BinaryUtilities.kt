@@ -25,6 +25,6 @@ object BinaryUtilities {
         if (working > 0) {
             return null
         }
-        return offset
+        return offset - 1
     }
 }
