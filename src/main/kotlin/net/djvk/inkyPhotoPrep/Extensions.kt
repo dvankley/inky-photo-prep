@@ -1,4 +1,5 @@
-import org.bytedeco.opencv.global.opencv_imgproc.CV_AA
+package net.djvk.inkyPhotoPrep
+
 import org.bytedeco.opencv.opencv_core.Point2d
 import org.bytedeco.opencv.opencv_core.Rect
 import org.bytedeco.opencv.opencv_core.RectVector

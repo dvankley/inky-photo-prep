@@ -1,4 +1,4 @@
-package faces
+package net.djvk.inkyPhotoPrep.faces
 
 import org.bytedeco.opencv.opencv_core.Mat
 

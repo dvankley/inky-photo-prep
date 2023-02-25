@@ -1,9 +1,11 @@
+package net.djvk.inkyPhotoPrep
+
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.exif.ExifIFD0Directory
-import dithering.inkyPalette
-import encoding.InkyFramebufferEncoder
-import faces.DnnFaceDetector
-import faces.FaceDetector
+import net.djvk.inkyPhotoPrep.dithering.inkyPalette
+import net.djvk.inkyPhotoPrep.encoding.InkyFramebufferEncoder
+import net.djvk.inkyPhotoPrep.faces.DnnFaceDetector
+import net.djvk.inkyPhotoPrep.faces.FaceDetector
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -45,8 +47,8 @@ const val FACE_DETECTION_DEBUG = false
 val ditherer = PatternDitherer()
 
 /**
- * Choose your preferred face detector here.
- * There honestly isn't much point in using the haar detector.
+ * Choose your preferred face net.djvk.inkyPhotoPrep.getDetector here.
+ * There honestly isn't much point in using the haar net.djvk.inkyPhotoPrep.getDetector.
  */
 val detector = DnnFaceDetector()
 
@@ -265,10 +267,10 @@ suspend fun getCropCenterTarget(faces: List<DnnFaceDetector.Face>, file: File, i
         filteredFaces = faces.filter { it.confidence > lowerFaceConfidenceThreshold }
     }
     return if (filteredFaces.isEmpty()) {
-        // No faces detected, just use the center of the photo
+        // No faces detected, just use the net.djvk.inkyPhotoPrep.center of the photo
         Point((img.width / 2.0).roundToInt(), (img.height / 2.0).roundToInt())
     } else {
-        // Average out the center of all the faces to get our target
+        // Average out the net.djvk.inkyPhotoPrep.center of all the faces to get our target
         var faceCount = 0
         var totalCenterX = 0.0
         var totalCenterY = 0.0

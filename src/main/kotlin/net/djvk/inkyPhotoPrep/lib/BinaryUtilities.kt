@@ -1,4 +1,4 @@
-package lib
+package net.djvk.inkyPhotoPrep.lib
 
 object BinaryUtilities {
     /**

@@ -1,8 +1,7 @@
-package encoding
+package net.djvk.inkyPhotoPrep.encoding
 
-import lib.BinaryUtilities
+import net.djvk.inkyPhotoPrep.lib.BinaryUtilities
 import java.awt.image.BufferedImage
-import kotlin.math.ln
 
 /**
  * Based on https://github.com/pimoroni/pimoroni-pico/issues/681#issuecomment-1440469730

@@ -1,6 +1,6 @@
-package faces
+package net.djvk.inkyPhotoPrep.faces
 
-import iterator
+import net.djvk.inkyPhotoPrep.iterator
 import org.bytedeco.opencv.global.opencv_core
 import org.bytedeco.opencv.global.opencv_imgproc
 import org.bytedeco.opencv.opencv_core.Mat
@@ -21,9 +21,11 @@ class HaarFaceDetector : FaceDetector {
         val faces = RectVector()
         classifier.detectMultiScale(grayImage, faces)
         val total = faces.size()
-        return faces.iterator().map { DnnFaceDetector.Face(
-            1.0F,
-            Rectangle(it.x(), it.y(), it.width(), it.height())
-        ) }.toList()
+        return faces.iterator().map {
+            DnnFaceDetector.Face(
+                1.0F,
+                Rectangle(it.x(), it.y(), it.width(), it.height())
+            )
+        }.toList()
     }
 }

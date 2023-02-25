@@ -27,7 +27,7 @@ images.
 
 # Configuration
 I was too lazy to extract most config to a file or args. All parameters are constants
-in code that you can diddle with. See the constants at the top of `Main.kt` and `PatternDitherer` especially.
+in code that you can diddle with. See the constants at the top of `Main.kt` and `net.djvk.inkyPhotoPrep.PatternDitherer` especially.
 
 # FAQs
 1. Why didn't you do this in Python, where face detection is easier to use

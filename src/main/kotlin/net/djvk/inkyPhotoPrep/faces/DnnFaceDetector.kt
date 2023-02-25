@@ -1,4 +1,4 @@
-package faces
+package net.djvk.inkyPhotoPrep.faces
 
 import org.bytedeco.javacpp.indexer.FloatIndexer
 import org.bytedeco.opencv.global.opencv_core.CV_32F

@@ -1,3 +1,5 @@
+package net.djvk.inkyPhotoPrep
+
 import org.bytedeco.opencv.opencv_core.RectVector
 import org.opencv.core.CvType
 import org.opencv.core.Mat

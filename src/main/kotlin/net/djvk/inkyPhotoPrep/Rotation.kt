@@ -1,3 +1,5 @@
+package net.djvk.inkyPhotoPrep
+
 import java.awt.image.BufferedImage
 
 enum class Rotation {

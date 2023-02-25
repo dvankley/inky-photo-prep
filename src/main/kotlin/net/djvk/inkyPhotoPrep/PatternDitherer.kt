@@ -1,5 +1,7 @@
-import dithering.Ditherer
-import dithering.inkyPalette
+package net.djvk.inkyPhotoPrep
+
+import net.djvk.inkyPhotoPrep.dithering.Ditherer
+import net.djvk.inkyPhotoPrep.dithering.inkyPalette
 import java.awt.Color
 import java.awt.image.BufferedImage
 
