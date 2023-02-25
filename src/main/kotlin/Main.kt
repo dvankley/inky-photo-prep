@@ -1,5 +1,6 @@
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.exif.ExifIFD0Directory
+import dithering.inkyPalette
 import encoding.InkyFramebufferEncoder
 import faces.DnnFaceDetector
 import faces.FaceDetector
@@ -161,7 +162,7 @@ private fun CoroutineScope.imageProcessingWorker(
                 }
             }
             OutputType.InkyPicoBinary -> {
-                val encoder = InkyFramebufferEncoder()
+                val encoder = InkyFramebufferEncoder(width, height, inkyPalette)
                 // Write to output directory
                 withContext(Dispatchers.IO) {
                     outputPath.resolve("${index}.bin").writeBytes(encoder.encode(dithered))
