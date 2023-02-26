@@ -165,7 +165,7 @@ private fun CoroutineScope.imageProcessingWorker(
                 }
             }
             OutputType.InkyPicoBinary -> {
-                val encoder = InkyFramebufferEncoder(width, height, inkyPalette)
+                val encoder = InkyFramebufferEncoder(targetWidth, targetHeight, inkyPalette)
                 // Write to output directory
                 withContext(Dispatchers.IO) {
                     outputPath.resolve("${index}.bin").writeBytes(encoder.encode(dithered))
