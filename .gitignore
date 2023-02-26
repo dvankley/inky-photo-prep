@@ -1,8 +1,6 @@
 .idea/
-input/
-input_original/
-output/
-output_bak*
+input*/
+output*/
 
 target/
 *.iml
