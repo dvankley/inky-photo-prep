@@ -12,7 +12,7 @@
     <name>inky-photo-prep</name>
 
     <properties>
-        <exec.mainClass>MainKt</exec.mainClass>
+        <exec.mainClass>net.djvk.inkyPhotoPrep.MainKt</exec.mainClass>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.code.style>official</kotlin.code.style>
         <java.version>17</java.version>
@@ -141,7 +141,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.6.0</version>
                 <configuration>
-                    <mainClass>MainKt</mainClass>
+                    <mainClass>net.djvk.inkyPhotoPrep.MainKt</mainClass>
                 </configuration>
             </plugin>
         </plugins>
