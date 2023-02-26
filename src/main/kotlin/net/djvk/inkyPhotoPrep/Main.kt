@@ -9,6 +9,7 @@ import net.djvk.inkyPhotoPrep.faces.FaceDetector
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import net.djvk.inkyPhotoPrep.dithering.YliluomaKnollPatternDitherer
 import org.bytedeco.javacv.Java2DFrameConverter
 import org.bytedeco.opencv.global.opencv_imgcodecs.imread
 import java.awt.*
@@ -44,7 +45,7 @@ const val FACE_DETECTION_DEBUG = false
 /**
  * Set to desired dithering class
  */
-val ditherer = PatternDitherer()
+val ditherer = YliluomaKnollPatternDitherer()
 
 /**
  * Choose your preferred face net.djvk.inkyPhotoPrep.getDetector here.
@@ -52,7 +53,7 @@ val ditherer = PatternDitherer()
  */
 val detector = DnnFaceDetector()
 
-val outputType = OutputType.InkyPicoBinary
+val outputType = OutputType.RpiJpeg
 
 /**
  * Width dimension of target display

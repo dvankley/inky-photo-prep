@@ -1,7 +1,5 @@
-package net.djvk.inkyPhotoPrep
+package net.djvk.inkyPhotoPrep.dithering
 
-import net.djvk.inkyPhotoPrep.dithering.Ditherer
-import net.djvk.inkyPhotoPrep.dithering.inkyPalette
 import java.awt.Color
 import java.awt.image.BufferedImage
 
@@ -17,8 +15,8 @@ import java.awt.image.BufferedImage
  * One side effect of this is there's a bunch of unsigned types in here that probably don't need to be
  *  here, I just left them in to minimize the chance of bugs in the conversion.
  */
-class PatternDitherer : Ditherer {
-    private val errorMultiplier = .09
+class YliluomaKnollPatternDitherer : Ditherer {
+    private val errorMultiplier = .015
 
     /* 8x8 threshold map (note: the patented pattern dithering algorithm uses 4x4) */
     private val map: Array<UByte> = arrayOf(
@@ -81,7 +79,7 @@ class PatternDitherer : Ditherer {
             for(index in inkyPalette.indices)
             {
                 val pc = Color(inkyPalette[index].toInt())
-                val penalty: Double = ColorCompare(pc, Color(t[0],t[1],t[2]))
+                val penalty: Double = ColorCompare(pc, Color(t[0], t[1], t[2]))
                 if(penalty < leastPenalty)
                 {
                     leastPenalty = penalty
