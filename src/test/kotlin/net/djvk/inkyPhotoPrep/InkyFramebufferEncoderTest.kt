@@ -11,8 +11,8 @@ internal class InkyFramebufferEncoderTest {
     @Test
     fun test_encode_simple() {
         val inputPixels = listOf(
-            uintArrayOf(inkyPalette[4], inkyPalette[4], inkyPalette[4], inkyPalette[4]),
-            uintArrayOf(inkyPalette[1], inkyPalette[1], inkyPalette[1], inkyPalette[1]),
+            uintArrayOf(inkyPalette[4], inkyPalette[4], inkyPalette[4], inkyPalette[2]),
+            uintArrayOf(inkyPalette[1], inkyPalette[1], inkyPalette[1], inkyPalette[2]),
         )
         val height = inputPixels.size
         val width = inputPixels.first().size
@@ -29,11 +29,11 @@ internal class InkyFramebufferEncoderTest {
 
         val expected = byteArrayOf(
             // First bit plane, most significant bit in the palette index
-            0b11110000.toByte(),
+            0b11100000.toByte(),
             // Second bit plane, middle bit in the palette index
-            0b00000000,
+            0b00010001,
             // Third bit plane, least significant bit in the palette index
-            0b00001111,
+            0b00001110,
         )
 
         assertContentEquals(expected, actual)

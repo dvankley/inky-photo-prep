@@ -36,11 +36,16 @@ class InkyFramebufferEncoder(
                 val palIndex = palette.indexOf(pixel.toUInt())
 
                 for (depth in 0 until bitDepth) {
-                    /** If the bit for this pixel in this bit plane should be set or not */
-                    val bit = if ((palIndex and (1 shl depth)) != 0) 1 else 0
+                    /**
+                     * If the bit for this pixel in this bit plane should not be set, we don't need to do
+                     *  anything here because our buffer is zeroed out by default.
+                     */
+                    if ((palIndex and (1 shl depth)) == 0) {
+                        continue
+                    }
 
                     /** Offset of the start of the relevant bit plane in the output buffer */
-                    val bitPlaneByteOffset = depth * bitPlaneSizeBytes
+                    val bitPlaneByteOffset = (bitDepth - depth - 1) * bitPlaneSizeBytes
                     /** Offset of this pixel, in bytes, from the start of the relevant bit plane */
                     val pixelByteOffset = pixelIndex / 8
                     /**
@@ -50,7 +55,7 @@ class InkyFramebufferEncoder(
                     val pixelBitOffset = pixelIndex % 8
                     val bufferByteOffset = bitPlaneByteOffset + pixelByteOffset
 
-                    outputBuffer[bufferByteOffset] = (outputBuffer[bufferByteOffset].toInt() or (bit shl pixelBitOffset)).toByte()
+                    outputBuffer[bufferByteOffset] = (outputBuffer[bufferByteOffset].toInt() or (0b10000000 shr pixelBitOffset)).toByte()
                 }
             }
         }
