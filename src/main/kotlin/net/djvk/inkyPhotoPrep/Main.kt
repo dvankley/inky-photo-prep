@@ -9,7 +9,7 @@ import net.djvk.inkyPhotoPrep.faces.FaceDetector
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
-import net.djvk.inkyPhotoPrep.dithering.YliluomaKnollPatternDitherer
+import net.djvk.inkyPhotoPrep.dithering.YliluomaKnollPattern
 import org.bytedeco.javacv.Java2DFrameConverter
 import org.bytedeco.opencv.global.opencv_imgcodecs.imread
 import java.awt.*
@@ -45,7 +45,7 @@ const val FACE_DETECTION_DEBUG = false
 /**
  * Set to desired dithering class
  */
-val ditherer = YliluomaKnollPatternDitherer()
+val ditherer = YliluomaKnollPattern(inkyPalette)
 
 /**
  * Choose your preferred face net.djvk.inkyPhotoPrep.getDetector here.
@@ -53,7 +53,7 @@ val ditherer = YliluomaKnollPatternDitherer()
  */
 val detector = DnnFaceDetector()
 
-val outputType = OutputType.RpiJpeg
+val outputType = OutputType.InkyPicoBinary
 
 /**
  * Width dimension of target display
@@ -97,31 +97,30 @@ fun main(args: Array<String>) {
     }
 
     runBlocking {
-        val inputFileChannel = Channel<File>(Channel.Factory.UNLIMITED)
+        val inputFileChannel = Channel<Pair<Int, File>>(Channel.Factory.UNLIMITED)
         val files = inputPath.toFile().listFiles(PhotoFilenameFilter)
             ?: throw IllegalArgumentException("Input directory empty")
 
-        files.forEach {
-            println("Sending $it to channel")
-            inputFileChannel.send(it)
+        files.forEachIndexed { index, file ->
+            println("Sending $file to channel with index $index")
+            inputFileChannel.send(Pair(index, file))
         }
         inputFileChannel.close()
 
         // Process in parallel
-        val processingWorkers = (1..workerCount).map { index ->
-            imageProcessingWorker(index, inputFileChannel, detector, outputPath)
+        val processingWorkers = (1..workerCount).map {
+            imageProcessingWorker(inputFileChannel, detector, outputPath)
         }
         processingWorkers.joinAll()
     }
 }
 
 private fun CoroutineScope.imageProcessingWorker(
-    index: Int,
-    fileChannel: ReceiveChannel<File>,
+    fileChannel: ReceiveChannel<Pair<Int, File>>,
     detector: FaceDetector,
     outputPath: Path,
 ) = launch {
-    for (file in fileChannel) {
+    for ((index, file) in fileChannel) {
         val logPrefix = "\t${file.name}:"
         println("$logPrefix Loading input image")
         val img = readAndRotateImage(file)
