@@ -1,6 +1,7 @@
 package net.djvk.inkyPhotoPrep.encoding
 
 import net.djvk.inkyPhotoPrep.lib.BinaryUtilities
+import java.awt.Color
 import java.awt.image.BufferedImage
 
 /**
@@ -9,8 +10,9 @@ import java.awt.image.BufferedImage
 class InkyFramebufferEncoder(
     private val width: Int,
     private val height: Int,
-    private val palette: Array<UInt>,
+    private val palette: Array<Color>,
 ) {
+    private val paletteRgb = palette.map { it.rgb }
     private val bitDepth = BinaryUtilities.getPowerOfTwo(palette.size)
         ?: throw IllegalArgumentException("Palette size is not a power of 2")
     private val bitPlaneSizeBits = width * height
@@ -33,7 +35,7 @@ class InkyFramebufferEncoder(
             for (x in 0 until width) {
                 val pixel = img.getRGB(x, y)
                 val pixelIndex = (y * width) + x
-                val palIndex = palette.indexOf(pixel.toUInt())
+                val palIndex = paletteRgb.indexOf(pixel)
 
                 for (depth in 0 until bitDepth) {
                     /**

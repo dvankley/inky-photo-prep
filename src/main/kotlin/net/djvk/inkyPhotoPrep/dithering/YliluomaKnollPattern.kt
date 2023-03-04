@@ -15,8 +15,10 @@ import java.awt.image.BufferedImage
  * One side effect of this is there's a bunch of unsigned types in here that probably don't need to be
  *  here, I just left them in to minimize the chance of bugs in the conversion.
  */
-class YliluomaKnollPatternDitherer : Ditherer {
-    private val errorMultiplier = .015
+class YliluomaKnollPattern(
+    private val palette: Array<Color>,
+) : Ditherer {
+    private val errorMultiplier = .02
 
     /* 8x8 threshold map (note: the patented pattern dithering algorithm uses 4x4) */
     private val map: Array<UByte> = arrayOf(
@@ -32,7 +34,7 @@ class YliluomaKnollPatternDitherer : Ditherer {
 
 
     /* Luminance for each palette entry, to be initialized as soon as the program begins */
-    var luma = Array<UInt>(inkyPalette.size) { 0.toUInt() }
+    var luma = Array<UInt>(palette.size) { 0.toUInt() }
 
     private fun PaletteCompareLuma(index1: UInt, index2: UInt): Int
     {
@@ -75,10 +77,10 @@ class YliluomaKnollPatternDitherer : Ditherer {
             if(t[2]<0) t[2]=0; else if(t[2]>255) t[2]=255
             // Find the closest color from the palette
             var leastPenalty: Double = 1e99
-            var chosen: UInt = c % inkyPalette.size.toUInt()
-            for(index in inkyPalette.indices)
+            var chosen: UInt = c % palette.size.toUInt()
+            for(index in palette.indices)
             {
-                val pc = Color(inkyPalette[index].toInt())
+                val pc = Color(palette[index].rgb)
                 val penalty: Double = ColorCompare(pc, Color(t[0], t[1], t[2]))
                 if(penalty < leastPenalty)
                 {
@@ -88,7 +90,7 @@ class YliluomaKnollPatternDitherer : Ditherer {
             }
             // Add it to candidates and update the error
             result.colors[c.toInt()] = chosen
-            val pc = Color(inkyPalette[chosen.toInt()].toInt())
+            val pc = Color(palette[chosen.toInt()].rgb)
             e[0] += src.red-pc.red
             e[1] += src.green-pc.green
             e[2] += src.blue-pc.blue
@@ -102,11 +104,11 @@ class YliluomaKnollPatternDitherer : Ditherer {
         val w = srcImage.width
         val h = srcImage.height
         val im = BufferedImage(srcImage.width, srcImage.height, BufferedImage.TYPE_INT_RGB)
-        for (c in 0u until inkyPalette.size.toUInt())
+        for (c in 0u until palette.size.toUInt())
         {
-            val r: UInt = inkyPalette[c.toInt()] shr 16
-            val g: UInt = (inkyPalette[c.toInt()] shr 8) and 0xFFu
-            val b: UInt = inkyPalette[c.toInt()] and 0xFFu
+            val r: UInt = palette[c.toInt()].rgb.toUInt() shr 16
+            val g: UInt = (palette[c.toInt()].rgb.toUInt() shr 8) and 0xFFu
+            val b: UInt = palette[c.toInt()].rgb.toUInt() and 0xFFu
             luma[c.toInt()] = r*299u + g*587u + b*114u
         }
         for (y in 0 until h) {
@@ -115,8 +117,8 @@ class YliluomaKnollPatternDitherer : Ditherer {
                 val color = srcImage.getRGB(x, y)
                 val map_value: UInt = map [(x and 7)+((y and 7) shl 3)].toUInt()
                 val plan = DeviseBestMixingPlan (color)
-                // The code online was conspicuously missing the inkyPalette[] reference here, which breaks the whole thing
-                im.setRGB(x, y, inkyPalette[plan.colors[map_value.toInt()].toInt()].toInt())
+                // The code online was conspicuously missing the palette[] reference here, which breaks the whole thing
+                im.setRGB(x, y, palette[plan.colors[map_value.toInt()].toInt()].rgb)
             }
         }
         return im

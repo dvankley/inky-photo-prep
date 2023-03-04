@@ -23,15 +23,15 @@ import java.awt.image.BufferedImage
 //)
 
 // From https://github.com/pimoroni/pimoroni-pico/issues/681#issuecomment-1440469730
-val inkyPalette: Array<UInt> = arrayOf(
-    Color(0, 0, 0).rgb.toUInt(),
-    Color(255, 255, 255).rgb.toUInt(),
-    Color(0, 255, 0).rgb.toUInt(),
-    Color(0, 0, 255).rgb.toUInt(),
-    Color(255, 0, 0).rgb.toUInt(),
-    Color(255, 255, 0).rgb.toUInt(),
-    Color(255, 128, 0).rgb.toUInt(),
-    Color(220, 180, 200).rgb.toUInt()
+val inkyPalette: Array<Color> = arrayOf(
+    Color(0, 0, 0),
+    Color(255, 255, 255),
+    Color(0, 255, 0),
+    Color(0, 0, 255),
+    Color(255, 0, 0),
+    Color(255, 255, 0),
+    Color(255, 128, 0),
+    Color(220, 180, 200),
 )
 
 interface Ditherer {
