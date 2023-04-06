@@ -2,7 +2,6 @@ package net.djvk.inkyPhotoPrep
 
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.exif.ExifIFD0Directory
-import net.djvk.inkyPhotoPrep.dithering.inkyPalette
 import net.djvk.inkyPhotoPrep.encoding.InkyFramebufferEncoder
 import net.djvk.inkyPhotoPrep.faces.DnnFaceDetector
 import net.djvk.inkyPhotoPrep.faces.FaceDetector
@@ -37,6 +36,15 @@ enum class OutputType {
     InkyPicoBinary,
 }
 
+enum class DisplayModel {
+    Inky57,
+    Inky73,
+}
+
+val outputType = OutputType.RpiJpeg
+val model = DisplayModel.Inky73
+
+
 /**
  * Set to true to write to output a copy of each input image with boxes drawn around each recognized face,
  *  with brightness proportional to confidence.
@@ -46,7 +54,7 @@ const val FACE_DETECTION_DEBUG = false
 /**
  * Set to desired dithering class
  */
-val ditherer = ErrorDiffusion(inkyPalette, ErrorDiffusion.DiffusionMap.Atkinson)
+val ditherer = ErrorDiffusion(getPalette(model), ErrorDiffusion.DiffusionMap.Atkinson)
 
 /**
  * Choose your preferred face net.djvk.inkyPhotoPrep.getDetector here.
@@ -54,18 +62,26 @@ val ditherer = ErrorDiffusion(inkyPalette, ErrorDiffusion.DiffusionMap.Atkinson)
  */
 val detector = DnnFaceDetector()
 
-val outputType = OutputType.InkyPicoBinary
-
 /**
  * Width dimension of target display
+ * Inky 5.7 is 600
+ * Inky 7.3 is 800
  */
-const val targetWidth = 600
+val targetWidth = when (model) {
+    DisplayModel.Inky57 -> 600
+    DisplayModel.Inky73 -> 800
+}
 
 /**
  * Height dimension of target display
+ * Inky 5.7 is 448
+ * Inky 7.3 is 480
  */
-const val targetHeight = 448
-const val targetAspectRatio = targetWidth / targetHeight.toDouble()
+val targetHeight = when (model) {
+    DisplayModel.Inky57 -> 448
+    DisplayModel.Inky73 -> 480
+}
+val targetAspectRatio = targetWidth / targetHeight.toDouble()
 
 /**
  * How many processing workers to use. Recommended setting is the number of CPU cores you have.
@@ -165,7 +181,7 @@ private fun CoroutineScope.imageProcessingWorker(
                 }
             }
             OutputType.InkyPicoBinary -> {
-                val encoder = InkyFramebufferEncoder(targetWidth, targetHeight, inkyPalette)
+                val encoder = InkyFramebufferEncoder(targetWidth, targetHeight, getPalette(model))
                 // Write to output directory
                 withContext(Dispatchers.IO) {
                     outputPath.resolve("${index}.bin").writeBytes(encoder.encode(dithered))
@@ -281,5 +297,24 @@ suspend fun getCropCenterTarget(faces: List<DnnFaceDetector.Face>, file: File, i
             totalCenterY += face.box.centerY
         }
         Point((totalCenterX / faceCount).roundToInt(), (totalCenterY / faceCount).roundToInt())
+    }
+}
+
+fun getPalette(model: DisplayModel): Array<Color> {
+    val basePalette = arrayOf(
+            Color(0, 0, 0),
+            Color(255, 255, 255),
+            Color(0, 255, 0),
+            Color(0, 0, 255),
+            Color(255, 0, 0),
+            Color(255, 255, 0),
+            Color(255, 128, 0),
+        )
+    // From https://github.com/pimoroni/pimoroni-pico/issues/681#issuecomment-1440469730
+    return when (model) {
+        DisplayModel.Inky57 -> basePalette + Color(220, 180, 200)
+        // The 7.3 doesn't have the "taupe" clear color
+        // See https://github.com/pimoroni/pimoroni-pico/blob/main/micropython/modules_py/inky_frame.md#colour--dithering
+        DisplayModel.Inky73 -> basePalette
     }
 }

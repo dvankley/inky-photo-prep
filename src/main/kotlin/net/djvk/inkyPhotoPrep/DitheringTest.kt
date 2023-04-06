@@ -5,9 +5,7 @@ import com.drew.metadata.exif.ExifIFD0Directory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import net.djvk.inkyPhotoPrep.dithering.ErrorDiffusion
 import net.djvk.inkyPhotoPrep.dithering.YliluomaKnollPattern
-import net.djvk.inkyPhotoPrep.dithering.inkyPalette
 import java.awt.Image
 import java.awt.image.BufferedImage
 import java.io.File
@@ -18,7 +16,8 @@ fun main(args: Array<String>) {
     println("Dithering test")
 
 //    val ditherer = ErrorDiffusion(inkyPalette, ErrorDiffusion.DiffusionMap.Atkinson)
-    val ditherer = YliluomaKnollPattern(inkyPalette)
+    // TODO: fix the palette here
+    val ditherer = YliluomaKnollPattern(arrayOf())
     val inputPath = Path("input")
     val outputPath = Path("output")
 

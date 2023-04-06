@@ -1,5 +1,7 @@
 package net.djvk.inkyPhotoPrep.dithering
 
+import net.djvk.inkyPhotoPrep.DisplayModel
+import net.djvk.inkyPhotoPrep.model
 import java.awt.Color
 import java.awt.image.BufferedImage
 
@@ -21,18 +23,6 @@ import java.awt.image.BufferedImage
 ////    216 123 36 Index 6 # orange
 //    Color(216, 123, 36).rgb.toUInt(),
 //)
-
-// From https://github.com/pimoroni/pimoroni-pico/issues/681#issuecomment-1440469730
-val inkyPalette: Array<Color> = arrayOf(
-    Color(0, 0, 0),
-    Color(255, 255, 255),
-    Color(0, 255, 0),
-    Color(0, 0, 255),
-    Color(255, 0, 0),
-    Color(255, 255, 0),
-    Color(255, 128, 0),
-    Color(220, 180, 200),
-)
 
 interface Ditherer {
     fun dither(srcImage: BufferedImage): BufferedImage
